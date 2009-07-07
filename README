@@ -3,7 +3,7 @@ NAME
     indirect method calls.
 
 VERSION
-    Version 0.01
+    Version 0.02
 
 DESCRIPTION
     This Perl::Critic dynamic policy reports any use of indirect object
