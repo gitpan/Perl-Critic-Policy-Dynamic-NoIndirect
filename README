@@ -1,0 +1,46 @@
+NAME
+    Perl::Critic::Policy::Dynamic::NoIndirect - Perl::Critic policy against
+    indirect method calls.
+
+VERSION
+    Version 0.01
+
+DESCRIPTION
+    This Perl::Critic dynamic policy reports any use of indirect object
+    syntax with a 'stern' severity. It's listed under the 'dynamic' and
+    'maintenance' themes.
+
+    Since it wraps around indirect, it needs to compile the audited code and
+    as such is implemented as a subclass of Perl::Critic::DynamicPolicy.
+
+DEPENDENCIES
+    perl 5.8, Carp.
+
+    Perl::Critic, Perl::Critic::Dynamic.
+
+    indirect.
+
+AUTHOR
+    Vincent Pit, "<perl at profvince.com>", <http://www.profvince.com>.
+
+    You can contact me by mail or on "irc.perl.org" (vincent).
+
+BUGS
+    Please report any bugs or feature requests to
+    "bug-perl-critic-policy-dynamic-noindirect at rt.cpan.org", or through
+    the web interface at
+    <http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Perl-Critic-Policy-Dynam
+    ic-NoIndirect>. I will be notified, and then you'll automatically be
+    notified of progress on your bug as I make changes.
+
+SUPPORT
+    You can find documentation for this module with the perldoc command.
+
+        perldoc Perl::Critic::Policy::Dynamic::NoIndirect 
+
+COPYRIGHT & LICENSE
+    Copyright 2009 Vincent Pit, all rights reserved.
+
+    This program is free software; you can redistribute it and/or modify it
+    under the same terms as Perl itself.
+

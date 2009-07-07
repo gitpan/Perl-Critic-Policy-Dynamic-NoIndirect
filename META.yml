@@ -1,0 +1,34 @@
+--- #YAML:1.0
+name:               Perl-Critic-Policy-Dynamic-NoIndirect
+version:            0.01
+abstract:           Perl::Critic policy against indirect method calls.
+author:
+    - Vincent Pit <perl@profvince.com>
+license:            perl
+distribution_type:  module
+configure_requires:
+    ExtUtils::MakeMaker:  0
+build_requires:
+    ExtUtils::MakeMaker:  0
+    Perl::Critic::TestUtils:  0
+    Test::More:           0
+requires:
+    base:                 0
+    Carp:                 0
+    indirect:             0.14
+    perl:                 5.008
+    Perl::Critic::DynamicPolicy:  0
+    Perl::Critic::Utils:  0
+resources:
+    bugtracker:  http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Perl-Critic-Policy-Dynamic-NoIndirect
+    homepage:    http://search.cpan.org/dist/Perl-Critic-Policy-Dynamic-NoIndirect/
+    license:     http://dev.perl.org/licenses/
+    repository:  http://git.profvince.com/?p=perl%2Fmodules%2FPerl-Critic-Policy-Dynamic-NoIndirect.git
+no_index:
+    directory:
+        - t
+        - inc
+generated_by:       ExtUtils::MakeMaker version 6.52
+meta-spec:
+    url:      http://module-build.sourceforge.net/META-spec-v1.4.html
+    version:  1.4
