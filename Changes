@@ -1,5 +1,11 @@
 Revision history for Perl-Critic-Policy-Dynamic-NoIndirect
 
+0.03    2009-07-09 09:05 UTC
+        + Add : A sample script.
+        + Fix : Multiple violations with the same method on the same line were
+                not reported.
+        + Upd : Bump indirect dependency to 0.15.
+
 0.02    2009-07-07 16:25 UTC
         + Fix : Incomplete MANIFEST.
 

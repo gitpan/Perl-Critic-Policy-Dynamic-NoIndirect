@@ -11,11 +11,11 @@ Perl::Critic::Policy::Dynamic::NoIndirect - Perl::Critic policy against indirect
 
 =head1 VERSION
 
-Version 0.02
+Version 0.03
 
 =cut
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 =head1 DESCRIPTION
 
@@ -74,23 +74,24 @@ sub violates_dynamic {
  my @violations;
 
  if (@errs) {
-  my ($err, $obj, $meth, $line);
+  my %errs_tags;
+  for (@errs) {
+   my ($obj, $meth, $line) = @$_[0, 1, 3];
+   $line -= $offset;
+   my $tag = join "\0", $line, $meth, $obj;
+   push @{$errs_tags{$tag}}, [ $obj, $meth ];
+  }
 
   $doc->find(sub {
-   unless ($err) {
-    return 1 unless @errs;
-    $err = shift @errs;
-    ($obj, $meth, $line) = @$err[0, 1, 3];
-    $line -= $offset;
-   }
-
    my $elt = $_[1];
    my $pos = $elt->location;
+   return 0 unless $pos;
 
-   if ($pos and $pos->[0] == $line and $elt eq $meth
-                                   and $elt->snext_sibling eq $obj) {
-    push @violations, [ $obj, $meth, $elt ];
-    undef $err;
+   my $tag = join "\0", $pos->[0], $elt, $elt->snext_sibling;
+   if (my $errs = $errs_tags{$tag}) {
+    push @violations, do { my $e = pop @$errs; push @$e, $elt; $e };
+    delete $errs_tags{$tag} unless @$errs;
+    return 1 unless %errs_tags;
    }
 
    return 0;

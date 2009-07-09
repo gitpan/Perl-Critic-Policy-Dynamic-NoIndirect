@@ -3,10 +3,13 @@
 use strict;
 use warnings;
 
-my $subtests;
-BEGIN { $subtests = 3 }
+my ($tests, $subtests);
+BEGIN {
+ $tests    = 15;
+ $subtests = 3;
+}
 
-use Test::More tests => $subtests * 14;
+use Test::More tests => $tests + $subtests * 25;
 
 use Perl::Critic::TestUtils qw/pcritique_with_violations/;
 
@@ -31,6 +34,8 @@ my $policy = 'Dynamic::NoIndirect';
    diag "Compilation $id failed: $@";
    next;
   }
+
+  is @violations, @expected, "right count of violations $id";
 
   for my $v (@violations) {
    my $exp = shift @expected;
@@ -67,10 +72,29 @@ my $x = new X    new X;
 ----
 [ 'new', 'X', 1, 9 ], [ 'new', 'X', 1, 18 ]
 ####
+my $x = new X    new Y;
+----
+[ 'new', 'X', 1, 9 ], [ 'new', 'Y', 1, 18 ]
+####
 my $x = new X;
 my $y = new X;
 ----
 [ 'new', 'X', 1, 9 ], [ 'new', 'X', 2, 9 ]
+####
+my $x = new
+            X;
+----
+[ 'new', 'X', 1, 9 ]
+####
+my $x = new
+ X new
+    X;
+----
+[ 'new', 'X', 1, 9 ], [ 'new', 'X', 2, 4 ]
+####
+my $x = new new;
+----
+[ 'new', 'new', 1, 9 ]
 ####
 our $obj;
 my $x = new $obj;
@@ -87,9 +111,26 @@ my $x = new $obj    new $obj;
 ----
 [ 'new', '$obj', 2, 9 ], [ 'new', '$obj', 2, 21 ]
 ####
+our ($o1, $o2);
+my $x = new $o1     new $o2;
+----
+[ 'new', '$o1', 2, 9 ], [ 'new', '$o2', 2, 21 ]
+####
 our $obj;
 my $x = new $obj;
 my $y = new $obj;
 ----
 [ 'new', '$obj', 2, 9 ], [ 'new', '$obj', 3, 9 ]
-
+####
+our $obj;
+my $x = new
+            $obj;
+----
+[ 'new', '$obj', 2, 9 ]
+####
+our $obj;
+my $x = new
+ $obj new
+    $obj;
+----
+[ 'new', '$obj', 2, 9 ], [ 'new', '$obj', 3, 7 ]

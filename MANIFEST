@@ -4,6 +4,7 @@ META.yml
 Makefile.PL
 README
 lib/Perl/Critic/Policy/Dynamic/NoIndirect.pm
+samples/check.pl
 t/00-load.t
 t/10-basic.t
 t/91-pod.t
