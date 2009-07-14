@@ -35,7 +35,7 @@ WriteMakefile(
         'Perl::Critic::Utils'         => 0,
         'Perl::Critic::DynamicPolicy' => 0,
         'base'                        => 0,
-        'indirect'                    => '0.15',
+        'indirect'                    => '0.16',
     },
     MIN_PERL_VERSION => 5.008,
     META_MERGE       => \%META,

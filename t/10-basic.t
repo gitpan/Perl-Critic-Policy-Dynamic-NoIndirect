@@ -3,19 +3,28 @@
 use strict;
 use warnings;
 
-my ($tests, $subtests);
+my ($tests, $reports, $subtests);
 BEGIN {
- $tests    = 15;
+ $tests    = 27;
+ $reports  = 42;
  $subtests = 3;
 }
 
-use Test::More tests => $tests + $subtests * 25;
+use Test::More tests => $tests + $subtests * $reports;
 
 use Perl::Critic::TestUtils qw/pcritique_with_violations/;
 
 Perl::Critic::TestUtils::block_perlcriticrc();
 
 my $policy = 'Dynamic::NoIndirect';
+
+sub expect {
+ my ($meth, $obj) = @_;
+ $obj = ($obj =~ /^\s*\{/) ? "a block" : "object \"\Q$obj\E\"";
+ qr/^Indirect call of method \"\Q$meth\E\" on $obj/,
+}
+
+sub zap (&) { }
 
 {
  local $/ = "####";
@@ -25,7 +34,7 @@ my $policy = 'Dynamic::NoIndirect';
  while (<DATA>) {
   s/^\s+//s;
 
-  my ($code, $expected) = split /^-+$/m, $_, 2;
+  my ($code, $expected) = split /^-{4,}$/m, $_, 2;
   my @expected = eval $expected;
 
   my @violations = eval { pcritique_with_violations($policy, \$code) };
@@ -48,9 +57,7 @@ my $policy = 'Dynamic::NoIndirect';
    my $pos = $v->location;
    my ($meth, $obj, $line, $col) = @$exp;
 
-   like $v->description,
-        qr/^Indirect call of method \"\Q$meth\E\" on object \"\Q$obj\E\"/,
-        "description $id";
+   like $v->description, expect($meth, $obj), "description $id";
    is   $pos->[0], $line, "line $id";
    is   $pos->[1], $col,  "column $id";
   }
@@ -63,6 +70,9 @@ __DATA__
 my $x = new X;
 ----
 [ 'new', 'X', 1, 9 ]
+####
+use indirect; my $x = new X;
+----
 ####
 my $x = new X; $x = new X;
 ----
@@ -95,6 +105,10 @@ my $x = new
 my $x = new new;
 ----
 [ 'new', 'new', 1, 9 ]
+####
+our $obj;
+use indirect; my $x = new $obj;
+----
 ####
 our $obj;
 my $x = new $obj;
@@ -134,3 +148,56 @@ my $x = new
     $obj;
 ----
 [ 'new', '$obj', 2, 9 ], [ 'new', '$obj', 3, 7 ]
+####
+my $x = main::zap { };
+----
+####
+my $x = meh { };
+----
+[ 'meh', '{', 1, 9 ]
+####
+my $x = meh {
+ 1
+};
+----
+[ 'meh', '{', 1, 9 ]
+####
+my $x =
+ meh { 1; 1
+ };
+----
+[ 'meh', '{', 2, 2 ]
+####
+my $x = meh {
+ new X;
+};
+----
+[ 'meh', '{', 1, 9 ], [ 'new', 'X', 2, 2 ]
+####
+our $obj;
+my $x = meh {
+ new $obj;
+}
+----
+[ 'meh', '{', 2, 9 ], [ 'new', '$obj', 3, 2 ]
+####
+my $x = meh { } new
+                X;
+----
+[ 'meh', '{', 1, 9 ], [ 'new', 'X', 1, 17 ]
+####
+our $obj;
+my $x = meh { } new
+                $obj;
+----
+[ 'meh', '{', 2, 9 ], [ 'new', '$obj', 2, 17 ]
+####
+our $obj;
+my $x = meh { new X } new $obj;
+----
+[ 'meh', '{', 2, 9 ], [ 'new', 'X', 2, 15 ], [ 'new', '$obj', 2, 23 ]
+####
+our $obj;
+my $x = meh { new $obj } new X;
+----
+[ 'meh', '{', 2, 9 ], [ 'new', '$obj', 2, 15 ], [ 'new', 'X', 2, 26 ]

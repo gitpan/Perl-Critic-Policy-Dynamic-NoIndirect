@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               Perl-Critic-Policy-Dynamic-NoIndirect
-version:            0.03
+version:            0.04
 abstract:           Perl::Critic policy against indirect method calls.
 author:
     - Vincent Pit <perl@profvince.com>
@@ -15,7 +15,7 @@ build_requires:
 requires:
     base:                 0
     Carp:                 0
-    indirect:             0.15
+    indirect:             0.16
     perl:                 5.008
     Perl::Critic::DynamicPolicy:  0
     Perl::Critic::Utils:  0
