@@ -3,7 +3,7 @@ NAME
     indirect method calls.
 
 VERSION
-    Version 0.04
+    Version 0.05
 
 DESCRIPTION
     This Perl::Critic dynamic policy reports any use of indirect object
@@ -14,7 +14,7 @@ DESCRIPTION
     as such is implemented as a subclass of Perl::Critic::DynamicPolicy.
 
 CAVEATS
-    The uses of the indirect pragma inside the auditted code take precedence
+    The uses of the indirect pragma inside the audited code take precedence
     over this policy. Hence no violations will be reported for indirect
     method calls that are located inside the lexical scope of "use indirect"
     or "no indirect hook => ...". Occurrences of "no indirect" won't be a
@@ -31,7 +31,17 @@ DEPENDENCIES
 
     Perl::Critic, Perl::Critic::Dynamic.
 
-    indirect.
+    indirect 0.20.
+
+SEE ALSO
+    Perl::Critic::Policy::Objects::ProhibitIndirectSyntax is a Perl::Critic
+    policy that statically checks for indirect constructs. But to be static
+    it has to be very restricted : you have to manually specify which
+    subroutine names are methods for which the indirect form should be
+    forbidden. This can lead to false positives (a subroutine with the name
+    you gave is defined in the current scope) and negatives (indirect
+    constructs for methods you didn't specify). But you don't need to
+    actually compile (or run, as it's more or less the same thing) the code.
 
 AUTHOR
     Vincent Pit, "<perl at profvince.com>", <http://www.profvince.com>.
@@ -49,10 +59,10 @@ BUGS
 SUPPORT
     You can find documentation for this module with the perldoc command.
 
-        perldoc Perl::Critic::Policy::Dynamic::NoIndirect 
+        perldoc Perl::Critic::Policy::Dynamic::NoIndirect
 
 COPYRIGHT & LICENSE
-    Copyright 2009 Vincent Pit, all rights reserved.
+    Copyright 2009,2010 Vincent Pit, all rights reserved.
 
     This program is free software; you can redistribute it and/or modify it
     under the same terms as Perl itself.

@@ -11,11 +11,11 @@ Perl::Critic::Policy::Dynamic::NoIndirect - Perl::Critic policy against indirect
 
 =head1 VERSION
 
-Version 0.04
+Version 0.05
 
 =cut
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 =head1 DESCRIPTION
 
@@ -43,19 +43,20 @@ my $tag_obj = sub {
 sub violates_dynamic {
  my ($self, undef, $doc) = @_;
 
- my $src;
-
+ my ($src, $file);
  if ($doc->isa('PPI::Document::File')) {
-  my $file = $doc->filename;
+  $file = $doc->filename;
   open my $fh, '<', $file
       or do { require Carp; Carp::confess("Can't open $file for reading: $!") };
   $src = do { local $/; <$fh> };
  } else {
-  $src = $doc->serialize;
+  $file = '(eval 0)';
+  $src  = $doc->serialize;
  }
 
+ $file =~ s/(?<!\\)((\\\\)*)"/$1\\"/g;
+
  my @errs;
- my $offset  = 6;
  my $wrapper = <<" WRAPPER";
  {
   return;
@@ -63,6 +64,7 @@ sub violates_dynamic {
   no indirect hook => sub { push \@errs, [ \@_ ] };
   {
    ;
+#line 1 "$file"
    $src
   }
  }
@@ -83,7 +85,6 @@ sub violates_dynamic {
   my %errs_tags;
   for (@errs) {
    my ($obj, $meth, $line) = @$_[0, 1, 3];
-   $line -= $offset;
    my $tag = join "\0", $line, $meth, $tag_obj->($obj);
    push @{$errs_tags{$tag}}, [ $obj, $meth ];
   }
@@ -117,7 +118,7 @@ sub violates_dynamic {
 
 =head1 CAVEATS
 
-The uses of the L<indirect> pragma inside the auditted code take precedence over this policy.
+The uses of the L<indirect> pragma inside the audited code take precedence over this policy.
 Hence no violations will be reported for indirect method calls that are located inside the lexical scope of C<use indirect> or C<< no indirect hook => ... >>.
 Occurrences of C<no indirect> won't be a problem.
 
@@ -129,7 +130,14 @@ L<perl> 5.8, L<Carp>.
 
 L<Perl::Critic>, L<Perl::Critic::Dynamic>.
 
-L<indirect>.
+L<indirect> 0.20.
+
+=head1 SEE ALSO
+
+L<Perl::Critic::Policy::Objects::ProhibitIndirectSyntax> is a L<Perl::Critic> policy that statically checks for indirect constructs.
+But to be static it has to be very restricted : you have to manually specify which subroutine names are methods for which the indirect form should be forbidden.
+This can lead to false positives (a subroutine with the name you gave is defined in the current scope) and negatives (indirect constructs for methods you didn't specify).
+But you don't need to actually compile (or run, as it's more or less the same thing) the code.
 
 =head1 AUTHOR
 
@@ -150,7 +158,7 @@ You can find documentation for this module with the perldoc command.
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright 2009 Vincent Pit, all rights reserved.
+Copyright 2009,2010 Vincent Pit, all rights reserved.
 
 This program is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
 
