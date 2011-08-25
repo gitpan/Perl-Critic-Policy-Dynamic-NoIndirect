@@ -5,14 +5,14 @@ use warnings;
 
 my ($tests, $reports, $subtests);
 BEGIN {
- $tests    = 27;
- $reports  = 42;
+ $tests    = 28;
+ $reports  = 43;
  $subtests = 3;
 }
 
 use Test::More tests => $tests + $subtests * $reports;
 
-use Perl::Critic::TestUtils qw/pcritique_with_violations/;
+use Perl::Critic::TestUtils qw<pcritique_with_violations>;
 
 Perl::Critic::TestUtils::block_perlcriticrc();
 
@@ -26,6 +26,7 @@ sub expect {
 
 sub zap (&) { }
 
+TEST:
 {
  local $/ = "####";
 
@@ -35,13 +36,24 @@ sub zap (&) { }
   s/^\s+//s;
 
   my ($code, $expected) = split /^-{4,}$/m, $_, 2;
-  my @expected = eval $expected;
+  my @expected;
+  {
+   local $@;
+   @expected = eval $expected;
+   if ($@) {
+    diag "Compilation of expected code $id failed: $@";
+    next TEST;
+   }
+  }
 
-  my @violations = eval { pcritique_with_violations($policy, \$code) };
-
-  if ($@) {
-   diag "Compilation $id failed: $@";
-   next;
+  my @violations;
+  {
+   local $@;
+   @violations = eval { pcritique_with_violations($policy, \$code) };
+   if ($@) {
+    diag "Critique test $id failed: $@";
+    next TEST;
+   }
   }
 
   is @violations, @expected, "right count of violations $id";
@@ -51,7 +63,7 @@ sub zap (&) { }
 
    unless ($exp) {
     fail "Unexpected violation for chunk $id: " . $v->description;
-    next;
+    next TEST;
    }
 
    my $pos = $v->location;
@@ -201,3 +213,7 @@ our $obj;
 my $x = meh { new $obj } new X;
 ----
 [ 'meh', '{', 2, 9 ], [ 'new', '$obj', 2, 15 ], [ 'new', 'X', 2, 26 ]
+####
+my $x = $invalid_global_when_strict_is_on; new X;
+----
+[ 'new', 'X', 1, 44 ]

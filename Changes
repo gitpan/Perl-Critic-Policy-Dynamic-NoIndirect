@@ -1,5 +1,11 @@
 Revision history for Perl-Critic-Policy-Dynamic-NoIndirect
 
+0.06    2011-08-25 14:55 UTC
+        + Fix : Don't compile the audited code with strict and warnings
+                forcefully in use.
+        + Fix : Compilation failures are now safely reported.
+        + Upd : Bump indirect dependency to 0.25.
+
 0.05    2010-04-19 13:35 UTC
         + Fix : Force the correct line number and file name before evaluating
                 the code.

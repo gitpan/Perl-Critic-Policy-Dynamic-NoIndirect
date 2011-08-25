@@ -16,7 +16,7 @@ my %PREREQ_PM = (
  'Perl::Critic::Utils'         => 0,
  'Perl::Critic::DynamicPolicy' => 0,
  'base'                        => 0,
- 'indirect'                    => '0.20',
+ 'indirect'                    => '0.25',
 );
 
 my %META = (
@@ -49,7 +49,7 @@ WriteMakefile(
  MIN_PERL_VERSION => 5.008,
  META_MERGE       => \%META,
  dist             => {
-  PREOP    => "pod2text $file > \$(DISTVNAME)/README",
+  PREOP    => "pod2text -u $file > \$(DISTVNAME)/README",
   COMPRESS => 'gzip -9f', SUFFIX => 'gz'
  },
  clean            => {

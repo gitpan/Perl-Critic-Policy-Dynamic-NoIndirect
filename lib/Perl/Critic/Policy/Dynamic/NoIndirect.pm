@@ -11,11 +11,11 @@ Perl::Critic::Policy::Dynamic::NoIndirect - Perl::Critic policy against indirect
 
 =head1 VERSION
 
-Version 0.05
+Version 0.06
 
 =cut
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 =head1 DESCRIPTION
 
@@ -26,12 +26,12 @@ Since it wraps around L<indirect>, it needs to compile the audited code and as s
 
 =cut
 
-use base qw/Perl::Critic::DynamicPolicy/;
+use base qw<Perl::Critic::DynamicPolicy>;
 
-use Perl::Critic::Utils qw/:severities/;
+use Perl::Critic::Utils qw<:severities>;
 
 sub default_severity { $SEVERITY_HIGH }
-sub default_themes   { qw/dynamic maintenance/ }
+sub default_themes   { qw<dynamic maintenance> }
 sub applies_to       { 'PPI::Document' }
 
 my $tag_obj = sub {
@@ -57,25 +57,26 @@ sub violates_dynamic {
  $file =~ s/(?<!\\)((\\\\)*)"/$1\\"/g;
 
  my @errs;
+ my $hook = sub { push @errs, [ @_ ] };
+
  my $wrapper = <<" WRAPPER";
- {
   return;
   package main;
-  no indirect hook => sub { push \@errs, [ \@_ ] };
-  {
-   ;
+  no strict;
+  no warnings;
+  no indirect hook => \$hook;
+  do {
 #line 1 "$file"
    $src
   }
- }
  WRAPPER
 
  {
   local ($@, *_);
   eval $wrapper; ## no critic
-  if ($@) {
+  if (my $err = $@) {
    require Carp;
-   Carp::confess("Couldn't compile the source wrapper: $@");
+   Carp::croak("Couldn't compile the source wrapper: $err");
   }
  }
 
@@ -158,7 +159,7 @@ You can find documentation for this module with the perldoc command.
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright 2009,2010 Vincent Pit, all rights reserved.
+Copyright 2009,2010,2011 Vincent Pit, all rights reserved.
 
 This program is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
 
